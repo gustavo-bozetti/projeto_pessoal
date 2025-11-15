@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Pet</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .innercircle_btn {
+      transition: top 160ms linear;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="stage" role="application">
+    <div class="top-bar">
+      <div class="model" id="model">
+        <h2>Me conte como se sente hoje</h2>
+        <input type="text" id="feel" placeholder="Digite seus sentimentos" style="z-index: 100;">
+      </div>
+      <div class="profile-card" aria-hidden="false">
+        <div class="avatar" aria-hidden="true"></div>
+        <div class="profile-info">
+          <div class="profile-name">Math</div>
+          <div class="profile-meta">
+            <span class="level">Lv. 3</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="xp-wrap">
+        <div class="xp-box">
+          <div class="xp-label">XP</div>
+          <div class="xp-bar">
+            <div class="xp-fill"></div>
+          </div>
+          <div style="min-width:46px;text-align:right;font-weight:700;font-size:13px">58%</div>
+        </div>
+      </div>
+    </div>
+    <button class="floating-add" onclick="handleExpandAction()" id="actions">
+      <div class="container-action">
+        <span class="sit">Sentar</span>
+        <span class="food" onclick="alimentar()">Alimentar</span>
+        -
+        <span class="talk" onclick="conversar()">Conversar</span>
+      </div>
+    </button>
+    <div class="scene">
+      <div class="pet-container" id="petWrap">
+        <img class="pet" id="petImg" src="/person.png" alt="pet">
+      </div>
+      <div class="ground"></div>
+    </div>
+    <div class="controls">
+      <div class="circle-btn">
+        <div id="innercircle_happy" class="innercircle_btn" style="top: -90px;">
+        </div>
+        <div class="img">
+          <img src="/icons/Smiling.svg" alt="felicidade" width="40">
+        </div>
+      </div>
+      <div class="circle-btn">
+        <div id="innercircle_hungry" class="innercircle_btn" style="top: -90px;">
+        </div>
+        <div class="img">
+          <img src="/icons/Beef.svg" alt="fome" width="40">
+        </div>
+      </div>
+      <div class="circle-btn">
+        <div id="innercircle_sleep" class="innercircle_btn" style="top: -90px;">
+        </div>
+        <div class="img">
+          <img src="/icons/Sleep.svg" alt="Sono" width="40">
+        </div>
+      </div>
+    </div>
+
+    <button class="explore-cta">
+      Explore
+    </button>
+  </div>
+</body>
+<script>
+  var positionStatus = [
+    -90,
+    -10
+  ]
+  var statusData = [
+    [
+      100,
+      1500,
+      innercircle_hungry
+    ],
+    [
+      100,
+      2500,
+      innercircle_happy
+    ],
+    [
+      100,
+      2500,
+      innercircle_sleep
+    ],
+
+  ]
+
+  var feeling = [
+    []
+  ]
+  function diminuirStatus(iStatus) {
+    statusData[iStatus][0] -= 5
+    calcularStatus(iStatus)
+  }
+  function calcularStatus(iStatus) {
+    var rangePX = positionStatus[0] - positionStatus[1]
+    var statusPX = (rangePX * statusData[iStatus][0]) / 100
+
+    if (statusPX <= positionStatus[1]) {
+      statusData[iStatus][2].style.top = `${statusPX}px`
+    } else {
+      statusData[iStatus][2].style.top = `${positionStatus[1]}px`
+    }
+  }
+  function alimentar() {
+    statusData[0][0] += 20
+    calcularStatus(0)
+  }
+  function intervalStatus(iStatus) {
+    setInterval(() => diminuirStatus(iStatus), statusData[iStatus][1])
+  }
+  function renderStatus() {
+    for (var i = 0; i < statusData.length; i++) {
+      intervalStatus(i)
+    }
+  }
+  renderStatus()
+  function handleExpandAction() {
+    if (actions.classList.contains('expand')) {
+      actions.classList.remove("expand")
+    } else {
+      actions.classList.add("expand")
+    }
+  }
+
+  function conversar() {
+    if (model.classList.contains('activate')) {
+      model.classList.remove('active')
+    } else {
+      model.classList.add('activate')
+    }
+  }
+</script>
+
+</html>

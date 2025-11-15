@@ -1,0 +1,293 @@
+  * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
+
+    body {
+      min-height: 100vh;
+      overflow-y: hidden;
+      background-image: url("/backgound/florest_day.png");
+      background-position: center bottom;
+      background-repeat: no-repeat;
+      background-size: cover;
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+      color: #0b2b2b;
+    }
+
+
+    .stage {
+      width: 100%;
+      pointer-events: none;
+    }
+
+    .top-bar {
+      position: absolute;
+      left: 20px;
+      right: 20px;
+      top: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      pointer-events: none;
+    }
+
+    .profile-card {
+      pointer-events: auto;
+      display: flex;
+      gap: 14px;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 12px;
+      padding: 10px 14px;
+      min-width: 220px;
+      box-shadow: 0 8px 18px rgba(3, 12, 8, 0.08);
+      align-items: center;
+    }
+
+    .avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      background: #e9eef0;
+      flex: 0 0 44px;
+    }
+
+    .profile-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .profile-name {
+      font-weight: 700;
+      font-size: 15px
+    }
+
+    .profile-meta {
+      font-size: 12px;
+      color: #8aa39a;
+      display: flex;
+      gap: 8px;
+      align-items: center
+    }
+
+    .level {
+      background: #ecf9f1;
+      color: #1b7a3a;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+    }
+
+    .xp-wrap {
+      pointer-events: none;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      top: 10px;
+      width: 480px;
+      max-width: 55%;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .xp-box {
+      pointer-events: auto;
+      background: linear-gradient(180deg, #1f5a3b, #154a2f);
+      color: white;
+      border-radius: 10px;
+      padding: 10px 14px;
+      width: 100%;
+      box-shadow: 0 10px 30px rgba(13, 58, 27, 0.35);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .xp-label {
+      font-weight: 700;
+      font-size: 14px;
+      min-width: 48px
+    }
+
+    .xp-bar {
+      flex: 1;
+      height: 12px;
+      background: rgba(255, 255, 255, 0.12);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .xp-fill {
+      width: 58%;
+      height: 100%;
+      background: linear-gradient(90deg, #e8ff83, #a9df5a)
+    }
+    .sit{
+      position: absolute;
+      top: 35px;
+      left: 38%;
+    }
+    .food{
+      position: absolute;
+      bottom: 35px;
+      left: 34%;
+    }
+    .talk{
+      position: absolute;
+      bottom: 44%;
+      left: 1%;
+    }
+    .container-action{
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .floating-add {
+    pointer-events: auto;
+    position: absolute;
+    right: 26px;
+    top: 40%;
+    transform: translateY(-50%);
+    width: 356px;
+    height: 356px;
+    border-radius: 50%;
+    background: #ffffff;
+    border: 8px solid rgba(255, 255, 255, 0.95);
+    box-shadow: 0 12px 30px rgba(4, 15, 8, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+    color: #2d7a2f;
+    cursor: pointer;
+    transition: all 0.4s ease; 
+  }
+
+  .floating-add.expand {
+    width: 356px;
+    height: 356px;
+  }
+
+    .scene {
+      position: absolute;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+      bottom: 20%;
+      left: 43%;
+    }
+
+    .ground {
+      width: 100%;
+      height: 56%;
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(180deg, rgba(0, 0, 0, 0.0), rgba(0, 0, 0, 0.04));
+      pointer-events: none;
+    }
+
+    .pet-container {
+      width: 220px;
+      height: 140px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      transform: translateY(20px);
+      filter: drop-shadow(0 8px 22px rgba(5, 20, 8, 0.45));
+    }
+
+    .pet {
+      width: 160px;
+      height: auto;
+    }
+
+    .controls {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: 34px;
+      display: flex;
+      gap: 18px;
+      align-items: center;
+      pointer-events: auto;
+    }
+
+    .circle-btn {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      background: #467F4F;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 12px 30px rgba(6, 20, 12, 0.24);
+      border: 6px solid rgba(255, 255, 255, 0.9);
+      cursor: pointer;
+      font-size: 28px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .circle-btn .img {
+      position: absolute;
+      left: 25%;
+      top: 25%;
+    }
+
+    .innercircle_btn {
+      width: 90px;
+      height: 90px;
+      background: #ffffff;
+      position: absolute;
+      left: 0%;
+    }
+
+    .explore-cta {
+      position: absolute;
+      right: 28px;
+      bottom: 28px;
+      background: linear-gradient(90deg, #c3e76f, #82c83a);
+      color: #fff;
+      padding: 14px 20px;
+      border-radius: 12px;
+      font-weight: 800;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border: none;
+      box-shadow: 0 12px 36px rgba(36, 88, 18, 0.28);
+      pointer-events: auto;
+      cursor: pointer;
+    }
+    .model{
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 40vw;
+      height: 40vh;
+      display: none;
+      background-color: wheat;
+      z-index: 10;
+      pointer-events: none;
+    }
+     .model.activate{
+      pointer-events: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
+    }

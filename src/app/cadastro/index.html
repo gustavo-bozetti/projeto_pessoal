@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Bem vindo</title>
+  <link rel="stylesheet" type="text/css" href="./style.css">
+</head>
+
+<body>
+  <main class="layout">
+    <div id="toast">
+      <div class="display">
+        <h3 id="mensagem_error"></h3>
+      </div>
+    </div>
+    <section class="left">
+      <div class="content">
+        <h1>Seja bem vindo</h1>
+          <label class="container-input">
+            <span>Nome completo:</span>
+            <input type="text" id="nome" placeholder="digite o nome" />
+          </label>
+          <label class="container-input">
+            <span>Email:</span>
+            <input type="email" id="ipt_email" oninput="input()" onblur="validarEmail()"
+              placeholder="digite seu email" />
+          </label>
+          <label class="container-input">
+            <span>Senha:</span>
+            <div id="contain">
+              <input type="password" id="ipt_senha" placeholder="digite sua senha" />
+              <div class="invisivel" id="senha_visibilidade" onclick="exibir()"></div>
+            </div>
+          </label>
+          <label class="container-input">
+            <span>Confirmar senha:</span>
+             <input type="password" id="confirmar_senha" placeholder="confirme a senha" />
+          </label>
+          <button class="btn" id="btn_cadastro" onclick="cadastrar()">Cadastrar</button>
+      </div>
+      <div class="decor"></div>
+    </section>
+
+    <aside class="right"></aside>
+  </main>
+</body>
+</html>
+<script>
+  function input() {
+    toast.style.top = '-80px'
+    ipt_email.classList.remove('shake', 'error')
+    ipt_senha.classList.remove('shake', 'error')
+  }
+
+  function validarEmail() {
+    var email = ipt_email.value.trim();
+
+    if (!email.includes('@') || !email.includes('.')) {
+      mensagem_error.innerHTML = 'Por favor, coloque um e-mail válido.';
+      //Estilização do css 
+      ipt_email.classList.add('shake', 'error');
+      toast.style.top = '20px';
+      toast.style.left = '20px';
+      btn_cadastro.classList.add('disable');
+      btn_cadastro.disabled = true;
+    } else {
+      ipt_email.classList.remove('shake', 'error');
+      mensagem_error.innerHTML = '';
+      btn_cadastro.disabled = false;
+      btn_cadastro.classList.remove('disable');
+    }
+  }
+
+  // Caixa de texto
+  function exibir() {
+    if (senha_visibilidade.classList.contains('invisivel')) {
+      ipt_senha.type = 'text';
+      senha_visibilidade.classList.remove('invisivel');
+      senha_visibilidade.classList.add('visivel');
+    } else {
+      ipt_senha.type = 'password';
+      senha_visibilidade.classList.remove('visivel');
+      senha_visibilidade.classList.add('invisivel');
+    }
+  }
+
+  //
+  function cadastrar() {
+    var senha = ''
+    var email = ipt_email.value.trim();
+    senha = ipt_senha.value.trim();
+    var nome_valor = nome.value.trim();
+    var conf = confirmar_senha.value.trim();
+    var qtdNumeros = 0
+    var qtdEspecial = 0
+
+    //tremer a caixa de erro
+    ipt_email.classList.remove('shake', 'error');
+    ipt_senha.classList.remove('shake', 'error');
+    nome.classList.remove('shake', 'error');
+    confirmar_senha.classList.remove('shake', 'error');
+
+    //validar se as caixas estão preechidas
+    if (email === '' || senha === '' || nome_valor === '' || conf === '') {
+      mensagem_error.innerHTML = 'Por favor, preencha todos os campos.';
+      toast.style.top = '20px';
+      toast.style.left = '20px';
+      ipt_email.classList.add('shake', 'error');
+      ipt_senha.classList.add('shake', 'error');
+      nome.classList.add('shake', 'error');
+      confirmar_senha.classList.add('shake', 'error');
+
+
+    } else {
+
+      var especial = ['@', '#', "$", "%", "&", "*", "(", ")"]
+      var numeros = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+      var count = 0
+      var countNum = 0
+
+      while (count < especial.length) {
+        if (senha.includes(especial[count])) {
+          qtdEspecial++
+        }
+        count++
+      }
+
+      while (countNum < numeros.length) {
+        if (senha.includes(numeros[countNum])) {
+          qtdNumeros++
+        }
+        countNum++
+      }
+
+      if (qtdEspecial < 1 || qtdNumeros < 1) {
+        mensagem_error.innerHTML = 'Coloque pelo menos um caracter especial e um número';
+        toast.style.top = '20px';
+        toast.style.left = '20px';
+        ipt_senha.classList.add('shake', 'error');
+        confirmar_senha.classList.add('shake', 'error');
+        return;
+      } else if (senha != conf) {
+        mensagem_error.innerHTML = 'As senhas não coincidem.';
+        toast.style.top = '20px';
+        toast.style.left = '20px';
+        ipt_senha.classList.add('shake', 'error');
+        confirmar_senha.classList.add('shake', 'error');
+        return;
+      }
+    }
+
+    fetch("/usuarios/cadastrar", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        nomeServer: nome_valor,
+        emailServer: email,
+        senhaServer: senha
+      }),
+    })
+      .then(function (resposta) {
+        console.log("resposta: ", resposta);
+
+        if (resposta.ok) {
+          alert("Cadastro realizado com sucesso! Redirecionando...");
+          toast.style.remove = '20px';
+
+          setTimeout(() => {
+            window.location.href = '../login/index.html';
+          }, 2000);
+
+        } else {
+          alert("Houve um erro ao tentar realizar o cadastro!");
+        }
+      })
+      .catch(function (resposta) {
+        console.log(`#ERRO: ${resposta}`);
+      });
+
+    return false;
+  }
+</script>

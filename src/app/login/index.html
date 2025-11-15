@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Bem vindo</title>
+  <link rel="stylesheet" type="text/css" href="./style.css">
+</head>
+
+<body>
+  <main class="layout">
+    <div id="toast">
+      <div class="display">
+        <h3 id="mensagem_error"></h3>
+      </div>
+    </div>
+    <section class="left">
+      <div class="content">
+        <h1>Bem vindo de volta</h1>
+        <label class="container-input">
+          <span>Email:</span>
+          <input type="email" id="ipt_email" oninput="input()" onblur="validarEmail()" placeholder="digite seu email" />
+        </label>
+        <label class="container-input">
+          <span>Senha:</span>
+          <div id="contain">
+            <input type="password" id="ipt_senha" placeholder="digite sua senha" />
+            <div class="invisivel" id="senha_visibilidade" onclick="exibir()"></div>
+          </div>
+        </label>
+        <button class="btn" id="btn_login" onclick="login()">Login</button>
+      </div>
+      <div class="decor"></div>
+    </section>
+
+    <aside class="right"></aside>
+  </main>
+</body>
+
+</html>
+<script>
+  function input() {
+    toast.style.top = '-80px'
+    ipt_email.classList.remove('shake', 'error')
+    ipt_senha.classList.remove('shake', 'error')
+  }
+
+  function validarEmail() {
+    var email = ipt_email.value.trim();
+
+    if (!email.includes('@') || !email.includes('.')) {
+      mensagem_error.innerHTML = 'Por favor, coloque um e-mail válido.';
+      //Estilização do css 
+      ipt_email.classList.add('shake', 'error');
+      toast.style.top = '20px';
+      toast.style.left = '20px';
+      btn_login.classList.add('disable');
+      btn_login.disabled = true;
+    } else {
+      ipt_email.classList.remove('shake', 'error');
+      mensagem_error.innerHTML = '';
+      btn_login.disabled = false;
+      btn_login.classList.remove('disable');
+    }
+  }
+
+  // Caixa de texto
+  function exibir() {
+    if (senha_visibilidade.classList.contains('invisivel')) {
+      ipt_senha.type = 'text';
+      senha_visibilidade.classList.remove('invisivel');
+      senha_visibilidade.classList.add('visivel');
+    } else {
+      ipt_senha.type = 'password';
+      senha_visibilidade.classList.remove('visivel');
+      senha_visibilidade.classList.add('invisivel');
+    }
+  }
+
+  function login() {
+    var senha = ''
+    var email = ipt_email.value.trim();
+    senha = ipt_senha.value.trim();
+    console.log(senha, email)
+
+    //tremer a caixa de erro
+    ipt_email.classList.remove('shake', 'error');
+    ipt_senha.classList.remove('shake', 'error');
+
+    fetch("/usuarios/autenticar", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        emailServer: email,
+        senhaServer: senha
+      }),
+    })
+      .then(function (resposta) {
+        console.log("resposta: ", resposta);
+
+        if (resposta.ok) {
+          alert("Login realizado com sucesso! Redirecionando...");
+          toast.style.remove = '20px';
+
+          setTimeout(() => {
+            window.location.href = '/index.html';
+          }, 2000);
+
+        } else {
+          alert("Houve um erro ao tentar realizar o login!");
+        }
+      })
+      .catch(function (resposta) {
+        console.log(`#ERRO: ${resposta}`);
+      });
+
+    return false;
+  }
+</script>
