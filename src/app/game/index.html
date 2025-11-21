@@ -6,6 +6,11 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Pet</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Alexandria:wght@100..900&family=Lora:ital,wght@0,400..700;1,400..700&family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap"
+    rel="stylesheet">
   <style>
     .innercircle_btn {
       transition: top 160ms linear;
@@ -17,40 +22,51 @@
   <div class="stage" role="application">
     <div class="top-bar">
       <div class="model" id="model">
-        <h2>Me conte como se sente hoje</h2>
-        <input type="text" id="feel" placeholder="Digite seus sentimentos" style="z-index: 100;">
+        <h2>Como se sente hoje?</h2>
+        <div id="emogis_container">
+        </div>
       </div>
-      <div class="profile-card" aria-hidden="false">
-        <div class="avatar" aria-hidden="true"></div>
+      <div class="profile-card">
+        <div class="avatar">
+          <img src="/icons/icon-perfil.png" alt="">
+        </div>
         <div class="profile-info">
           <div class="profile-name">Math</div>
           <div class="profile-meta">
-            <span class="level">Lv. 3</span>
+            <span class="level" id="level-badge">Lv. 3</span>
           </div>
         </div>
       </div>
-
-      <div class="xp-wrap">
+      <div class="xp-wrap" id="xpWrap">
         <div class="xp-box">
           <div class="xp-label">XP</div>
           <div class="xp-bar">
-            <div class="xp-fill"></div>
+            <div class="xp-fill" id="xpFill"></div>
           </div>
-          <div style="min-width:46px;text-align:right;font-weight:700;font-size:13px">58%</div>
+          <div id="xpPercent" style="min-width:46px;text-align:right;font-weight:700;font-size:13px">58%</div>
         </div>
       </div>
     </div>
-    <button class="floating-add" onclick="handleExpandAction()" id="actions">
-      <div class="container-action">
-        <span class="sit">Sentar</span>
-        <span class="food" onclick="alimentar()">Alimentar</span>
-        -
-        <span class="talk" onclick="conversar()">Conversar</span>
-      </div>
-    </button>
+    <div class="radial-menu-container" id="radialMenu">
+      <button class="menu-item btn-sentar" onclick="sentar()" id="levantar">
+        Sentar
+      </button>
+
+      <button class="menu-item btn-comer" onclick="alimentar()">
+        Comer
+      </button>
+
+      <button class="menu-item btn-falar" onclick="conversar()">
+        Falar
+      </button>
+
+      <button class="main-btn" onclick="toggleRadialMenu()">
+        <span class="icon">+</span>
+      </button>
+    </div>
     <div class="scene">
       <div class="pet-container" id="petWrap">
-        <img class="pet" id="petImg" src="/person.png" alt="pet">
+        <img class="pet" id="pet" src="/person.png" style="width: 160px;" alt="pet">
       </div>
       <div class="ground"></div>
     </div>
@@ -72,18 +88,73 @@
       <div class="circle-btn">
         <div id="innercircle_sleep" class="innercircle_btn" style="top: -90px;">
         </div>
-        <div class="img">
+        <div class="img" id="btn_anoitecer" onclick="virarNoite()">
           <img src="/icons/Sleep.svg" alt="Sono" width="40">
         </div>
       </div>
     </div>
-
     <button class="explore-cta">
       Explore
     </button>
   </div>
+  <video id="bg_video" autoplay muted loop playsinline preload="auto">
+    <source src="/backgound/anoitecer.mp4" type="video/mp4">
+  </video>
+  <div class="overlay" id="div_overlay">
+    <h2 id="text_transition"></h2>
+  </div>
 </body>
 <script>
+  var dia = true
+  var overlay = div_overlay
+
+  function startNightTransition() {
+    if (dia) {
+      text_transition.innerHTML = `Então anoiteceu...`
+    } else {
+      text_transition.innerHTML = `Então amanheceu...`
+    }
+
+    overlay.classList.add('active');
+    setTimeout(() => {
+      overlay.classList.remove('active')
+      overlay.classList.add('fade-out');
+      setTimeout(() => {
+        overlay.classList.remove('fade-out');
+      }, 7500);
+    }, 6000);
+  }
+  var videoNoite = bg_video
+
+  function virarNoite() {
+    if (dia) {
+      startNightTransition()
+      setTimeout(() => {
+        videoNoite.style.display = "block";
+        document.body.style.backgroundImage = "none";
+        setTimeout(() => {
+          videoNoite.style.opacity = "0";
+          videoNoite.style.display = "none";
+          document.body.style.backgroundImage = "url(/backgound/noite.png)";
+        }, 8000);
+      }, 5000)
+      dia = false
+    } else {
+      startNightTransition()
+      setTimeout(() => {
+        videoNoite.style.opacity = "0";
+        videoNoite.style.display = "none";
+        document.body.style.backgroundImage = "url(/backgound/dia2.png)";
+      }, 5000);
+      dia = true
+    }
+  }
+
+  function toggleRadialMenu() {
+    var menu = radialMenu;
+    menu.classList.toggle('active');
+  }
+
   var positionStatus = [
     -90,
     -10
@@ -108,12 +179,22 @@
   ]
 
   var feeling = [
-    []
+    [128526, 'estilo'],
+    [128512, 'feliz'],
+    [128544, 'bravo'],
+    [128546, 'triste'],
+    [128533, 'confuso']
   ]
+
   function diminuirStatus(iStatus) {
-    statusData[iStatus][0] -= 5
-    calcularStatus(iStatus)
+    if (dia) {
+      statusData[iStatus][0] -= 5
+      calcularStatus(iStatus)
+    } else {
+      dormir()
+    }
   }
+
   function calcularStatus(iStatus) {
     var rangePX = positionStatus[0] - positionStatus[1]
     var statusPX = (rangePX * statusData[iStatus][0]) / 100
@@ -127,6 +208,11 @@
   function alimentar() {
     statusData[0][0] += 20
     calcularStatus(0)
+    adicionarXP(18);
+  }
+  function dormir() {
+    statusData[2][0] += 1
+    calcularStatus(2)
   }
   function intervalStatus(iStatus) {
     setInterval(() => diminuirStatus(iStatus), statusData[iStatus][1])
@@ -144,14 +230,149 @@
       actions.classList.add("expand")
     }
   }
-
   function conversar() {
     if (model.classList.contains('activate')) {
       model.classList.remove('active')
     } else {
+      var textEmogi = ''
+      for (var i = 0; i < feeling.length; i++) {
+        textEmogi += `<button onclick='explainFeeling(${i})' class='emogi-button'>&#${feeling[i][0]}<button>`
+      }
+      emogis_container.innerHTML = textEmogi
       model.classList.add('activate')
     }
   }
+
+  function explainFeeling(indiceEmogi) {
+    model.innerHTML = `
+      <h2>Caso quiser explique o que sente <h2/>
+      <input type='text' id='ipt_textFeeling' oninput="handleTextFeeling()" class='ipt-fell'>
+    `
+  }
+
+  function handleTextFeeling() {
+    var textFeeling = ipt_textFeeling.value
+  }
+
 </script>
+<script>
+  var petId = document.getElementById('pet');
+  var petTam = 150
+  var framesSentar = [
+    '/sprints/sit/frame_1.png',
+    '/sprints/sit/frame_2.png',
+    '/sprints/sit/frame_3.png',
+    '/sprints/sit/frame_6.png',
+    '/sprints/sit/frame_7.png',
+    '/sprints/sit/frame_8.png',
+    '/sprints/sit/frame_9.png',
+    '/sprints/sit/frame_10.png',
+    '/sprints/sit/frame_11.png',
+    '/sprints/sit/frame_13.png',
+  ];
+  var fps = 12;
+  var isAnimating = false;
+
+  function aumentarPet() {
+    if (petTam <= 600) {
+      petId.style.width = `${petTam + 50}px`;
+      petTam += 100
+    }
+  }
+  function sentar() {
+    if (petId.src.includes(framesSentar[framesSentar.length - 1])) {
+      isAnimating = true;
+      var i = framesSentar.length - 1;
+      
+      var intervaloLevantar = setInterval(() => {
+        petId.src = framesSentar[i];
+        i--;
+
+        if (i <= 0) {
+          clearInterval(intervaloLevantar);
+          isAnimating = false;
+          petId.src = framesSentar[0];
+        }
+      }, 1000 / fps);
+
+      levantar.innerHTML = `Sentar`
+    } else {
+      isAnimating = true;
+      var i = 0;
+
+      var intervaloSentar = setInterval(() => {
+        petId.src = framesSentar[i];
+        i++;
+
+        if (i >= framesSentar.length) {
+          clearInterval(intervaloSentar);
+          isAnimating = false;
+          petId.src = framesSentar[framesSentar.length - 1];
+        }
+      }, 1000 / fps);
+       levantar.innerHTML = `Levantar`
+    }
+  }
+
+
+  var xpFillEl = document.getElementById('xpFill');
+  var xpPercentEl = document.getElementById('xpPercent');
+  var xpWrapEl = document.getElementById('xpWrap');
+  var levelBadgeEl = document.getElementById('level-badge');
+
+  var xpState = [0, 1];
+
+
+  function renderXP() {
+    var xp = xpState[0];
+    xpFillEl.style.width = xp + '%';
+    xpPercentEl.textContent = xp + '%';
+  }
+
+  function mostrarXP(tempo) {
+    xpWrapEl.classList.add('visible');
+
+    xpHideTimer = setTimeout(function () {
+      xpWrapEl.classList.remove('visible');
+      xpHideTimer = null;
+    }, tempo);
+  }
+
+  function pulsoLevel() {
+    levelBadgeEl.classList.add('level-badge-pop');
+    setTimeout(function () {
+      levelBadgeEl.classList.remove('level-badge-pop');
+    }, 750);
+  }
+
+  function adicionarXP(valor) {
+    var antes = xpState[0];
+    xpState[0] += valor;
+
+    var up = false;
+    while (xpState[0] >= 100) {
+      xpWrapEl.classList.add('max');
+      xpState[1] = xpState[1] + 1;
+      xpState[0] = xpState[0] - 100;
+      up = true;
+    }
+
+    renderXP(true);
+
+    if (xpState[0] > antes) {
+      mostrarXP(2800);
+    }
+
+    if (up) {
+      if (levelBadgeEl) levelBadgeEl.textContent = 'Lv. ' + xpState[1];
+      aumentarPet()
+      pulsoLevel()
+    }
+
+    return [up, xpState[0], xpState[1]];
+  }
+
+</script>
+
 
 </html>

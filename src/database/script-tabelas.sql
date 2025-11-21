@@ -1,62 +1,94 @@
--- Arquivo de apoio, caso você queira criar tabelas como as aqui criadas para a API funcionar.
--- Você precisa executar os comandos no banco de dados para criar as tabelas,
--- ter este arquivo aqui não significa que a tabela em seu BD estará como abaixo!
+create database BD_MATH;
+use BD_MATH;
 
-/*
-comandos para mysql server
-*/
-
-CREATE DATABASE aquatech;
-
-USE aquatech;
-
-CREATE TABLE empresa (
-	id INT PRIMARY KEY AUTO_INCREMENT,
-	razao_social VARCHAR(50),
-	cnpj CHAR(14),
-	codigo_ativacao VARCHAR(50)
-);
+drop database bd_math;
 
 CREATE TABLE usuario (
-	id INT PRIMARY KEY AUTO_INCREMENT,
-	nome VARCHAR(50),
-	email VARCHAR(50),
-	senha VARCHAR(50),
-	fk_empresa INT,
-	FOREIGN KEY (fk_empresa) REFERENCES empresa(id)
+    id_usuario INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    email VARCHAR(100),
+    senha varchar(100),
+    fk_dino INT UNIQUE,
+    src_icon varchar(100) default '/icons/icon-perfil.png',
+	create_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (fk_dino) REFERENCES dino(id_dino)
+)auto_increment=350;
+
+CREATE TABLE dino (
+    id_dino INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(50) DEFAULT 'Dino',
+    nivel INT DEFAULT 1,
+    xp INT DEFAULT 0,
+    src_skin VARCHAR(150) DEFAULT '/person.png',
+    fome INT DEFAULT 100,  
+    energia INT DEFAULT 100,   
+    create_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    update_at DATETIME null,
+    ultimo_acesso DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE dino_log (
+    fk_dino INT NOT NULL,
+	data_inicio DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    acao VARCHAR(20) NOT NULL, 
+    data_fim DATETIME NULL,
+    PRIMARY KEY (fk_dino, data_inicio),
+    FOREIGN KEY (fk_dino) REFERENCES dino(id_dino)
 );
 
-CREATE TABLE aviso (
-	id INT PRIMARY KEY AUTO_INCREMENT,
-	titulo VARCHAR(100),
-	descricao VARCHAR(150),
-	fk_usuario INT,
-	FOREIGN KEY (fk_usuario) REFERENCES usuario(id)
-);
+INSERT INTO dino (id_dino, nome, nivel, xp, fome, energia) VALUES
+(100, 'Rex Aventureiro', 5, 1200, 75, 50);
+INSERT INTO usuario (id_usuario, nome, email, senha, fk_dino) VALUES
+(350, 'Yasmim Souza', 'yasmim@gmail.com', 'senha123', 100);
 
-create table aquario (
-/* em nossa regra de negócio, um aquario tem apenas um sensor */
-	id INT PRIMARY KEY AUTO_INCREMENT,
-	descricao VARCHAR(300),
-	fk_empresa INT,
-	FOREIGN KEY (fk_empresa) REFERENCES empresa(id)
-);
+INSERT INTO dino_log (fk_dino, acao, data_inicio, data_fim) VALUES
+(100, 'ALIMENTAR', '2025-11-20 08:30:00', '2025-11-20 08:30:00');
 
-/* esta tabela deve estar de acordo com o que está em INSERT de sua API do arduino - dat-acqu-ino */
+INSERT INTO dino_log (fk_dino, acao, data_inicio, data_fim) VALUES
+(100, 'DORMIR', '2025-11-20 12:00:00', '2025-11-20 13:00:00');
 
-create table medida (
-	id INT PRIMARY KEY AUTO_INCREMENT,
-	dht11_umidade DECIMAL,
-	dht11_temperatura DECIMAL,
-	luminosidade DECIMAL,
-	lm35_temperatura DECIMAL,
-	chave TINYINT,
-	momento DATETIME,
-	fk_aquario INT,
-	FOREIGN KEY (fk_aquario) REFERENCES aquario(id)
-);
+INSERT INTO dino_log (fk_dino, acao, data_inicio, data_fim) VALUES
+(100, 'ALIMENTAR', '2025-11-20 13:30:00', '2025-11-20 13:30:00');
 
-insert into empresa (razao_social, codigo_ativacao) values ('Empresa 1', 'ED145B');
-insert into empresa (razao_social, codigo_ativacao) values ('Empresa 2', 'A1B2C3');
-insert into aquario (descricao, fk_empresa) values ('Aquário de Estrela-do-mar', 1);
-insert into aquario (descricao, fk_empresa) values ('Aquário de Peixe-dourado', 2);
+INSERT INTO dino_log (fk_dino, acao, data_inicio, data_fim) VALUES
+(100, 'DORMIR', '2025-11-20 22:00:00', '2025-11-21 05:00:00');
+
+INSERT INTO dino_log (fk_dino, acao, data_inicio, data_fim) VALUES
+(100, 'ALIMENTAR', '2025-11-21 07:00:00', '2025-11-21 07:00:00');
+
+INSERT INTO dino_log (fk_dino, acao, data_inicio, data_fim) VALUES
+(100, 'DORMIR', '2025-11-21 01:00:00', NULL);
+
+
+-- Buscar informações de dinossauro específico
+SELECT * FROM dino join usuario on usuario.fk_dino = dino.id_dino
+ where usuario.id_usuario = 350;
+
+-- Total de horas durmidas de todas ações
+SELECT 
+    SEC_TO_TIME(SUM(TIME_TO_SEC(TIMEDIFF(data_fim, data_inicio)))) AS tempo_total_sono
+FROM dino_log
+WHERE fk_dino = 100 
+  AND acao = 'DORMIR';
+  
+  -- Total de horas durmidas nessa ação
+SELECT 
+   TIMEDIFF(data_fim, data_inicio) AS tempo_total_sono
+FROM dino_log
+WHERE fk_dino = 100 
+  AND acao = 'DORMIR';
+
+-- Quantidade de vezes que se alimentou
+SELECT 
+    COUNT(*) AS total_vezes_alimentado
+FROM dino_log
+WHERE fk_dino = 100 
+  AND acao = 'ALIMENTAR';
+  
+  -- Quantidade de vezes que durmiu
+SELECT 
+    COUNT(*) AS total_vezes_alimentado
+FROM dino_log
+WHERE fk_dino = 100 
+  AND acao = 'DORMIR';
+  
+  
