@@ -61,9 +61,9 @@
   </div>
 
   <script>
-    const pet = document.getElementById('pet');
+    var pet = document.getElementById('pet');
 
-    const framesSentar = [
+    var framesSentar = [
       './src/public/sprints/born/quadro_2.png',
       './src/public/sprints/born/quadro_3.png',
       './src/public/sprints/born/quadro_5.png',
@@ -105,15 +105,15 @@
       './src/public/sprints/born/quadro_59.png',
     ];
 
-    const fps = 14;
-    let isAnimating = false;
+    var fps = 14;
+    var isAnimating = false;
 
     function sentar() {
       if (isAnimating) return;
       isAnimating = true;
-      let i = 0;
+      var i = 0;
 
-      const interval = setInterval(() => {
+      var interval = setInterval(() => {
         pet.src = framesSentar[i];
         i++;
 

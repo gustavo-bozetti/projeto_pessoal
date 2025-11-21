@@ -99,16 +99,26 @@
       }),
     })
       .then(function (resposta) {
-        console.log("resposta: ", resposta);
-
         if (resposta.ok) {
-          alert("Login realizado com sucesso! Redirecionando...");
-          toast.style.remove = '20px';
+          resposta.json().then(function (dados) {
+                    dado = dados[0]
+            console.log(dado)
+            sessionStorage.ID_USUARIO = dado.id_usuario;
+            sessionStorage.NOME_USUARIO = dado.nome_usuario;
+            sessionStorage.SRC_ICON = dado.src_icon;
 
-          setTimeout(() => {
-            window.location.href = '/index.html';
-          }, 2000);
+            sessionStorage.ID_DINO = dado.id_dino;
+            sessionStorage.NOME_DINO = dado.nome_dino;
+            sessionStorage.NIVEL_DINO = dado.nivel;
+            sessionStorage.FOME = dado.fome;
+            sessionStorage.ENERGIA = dado.energia;
+            sessionStorage.SRC_SKIN = dado.src_skin;
+            sessionStorage.ULTIMO_ACESSO_DINO = dado.ultimo_acesso;
 
+            setTimeout(() => {
+              window.location.href = '/game/index.html';
+            }, 2000);
+          })
         } else {
           alert("Houve um erro ao tentar realizar o login!");
         }

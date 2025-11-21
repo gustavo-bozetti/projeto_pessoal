@@ -1,134 +1,88 @@
-<!doctype html>
-<html lang="pt-BR">
-
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Pet</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Alexandria:wght@100..900&family=Lora:ital,wght@0,400..700;1,400..700&family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap"
-    rel="stylesheet">
-  <style>
-    .innercircle_btn {
-      transition: top 160ms linear;
-    }
-  </style>
-</head>
-
-<body>
-  <div class="stage" role="application">
-    <div class="top-bar">
-      <div class="model" id="model">
-        <h2>Como se sente hoje?</h2>
-        <div id="emogis_container">
-        </div>
-      </div>
-      <div class="profile-card">
-        <div class="avatar">
-          <img src="/icons/icon-perfil.png" alt="">
-        </div>
-        <div class="profile-info">
-          <div class="profile-name">Math</div>
-          <div class="profile-meta">
-            <span class="level" id="level-badge">Lv. 3</span>
-          </div>
-        </div>
-      </div>
-      <div class="xp-wrap" id="xpWrap">
-        <div class="xp-box">
-          <div class="xp-label">XP</div>
-          <div class="xp-bar">
-            <div class="xp-fill" id="xpFill"></div>
-          </div>
-          <div id="xpPercent" style="min-width:46px;text-align:right;font-weight:700;font-size:13px">58%</div>
-        </div>
-      </div>
-    </div>
-    <div class="radial-menu-container" id="radialMenu">
-      <button class="menu-item btn-sentar" onclick="sentar()" id="levantar">
-        Sentar
-      </button>
-
-      <button class="menu-item btn-comer" onclick="alimentar()">
-        Comer
-      </button>
-
-      <button class="menu-item btn-falar" onclick="conversar()">
-        Falar
-      </button>
-
-      <button class="main-btn" onclick="toggleRadialMenu()">
-        <span class="icon">+</span>
-      </button>
-    </div>
-    <div class="scene">
-      <div class="pet-container" id="petWrap">
-        <img class="pet" id="pet" src="/person.png" style="width: 160px;" alt="pet">
-      </div>
-      <div class="ground"></div>
-    </div>
-    <div class="controls">
-      <div class="circle-btn">
-        <div id="innercircle_happy" class="innercircle_btn" style="top: -90px;">
-        </div>
-        <div class="img">
-          <img src="/icons/Smiling.svg" alt="felicidade" width="40">
-        </div>
-      </div>
-      <div class="circle-btn">
-        <div id="innercircle_hungry" class="innercircle_btn" style="top: -90px;">
-        </div>
-        <div class="img">
-          <img src="/icons/Beef.svg" alt="fome" width="40">
-        </div>
-      </div>
-      <div class="circle-btn">
-        <div id="innercircle_sleep" class="innercircle_btn" style="top: -90px;">
-        </div>
-        <div class="img" id="btn_anoitecer" onclick="virarNoite()">
-          <img src="/icons/Sleep.svg" alt="Sono" width="40">
-        </div>
-      </div>
-    </div>
-    <button class="explore-cta">
-      Explore
-    </button>
-  </div>
-  <video id="bg_video" autoplay muted loop playsinline preload="auto">
-    <source src="/backgound/anoitecer.mp4" type="video/mp4">
-  </video>
-  <div class="overlay" id="div_overlay">
-    <h2 id="text_transition"></h2>
-  </div>
-</body>
 <script>
-  var dia = true
-  var overlay = div_overlay
+  if (!sessionStorage.ID_USUARIO) {
+      alert("Você precisa estar logado!");
+      window.location.href = '/login/index.html'; 
+  }
+
+  var sessaoNome = sessionStorage.NOME_USUARIO || 'Usuário';
+  var sessaoSkin = sessionStorage.SRC_SKIN || '/person.png';
+  var sessaoNivel = Number(sessionStorage.NIVEL_DINO) || 1;
+  var sessaoXP = Number(sessionStorage.XP) || 0; 
+  var sessaoFome = Number(sessionStorage.FOME) || 100;
+  var sessaoEnergia = Number(sessionStorage.ENERGIA) || 100;
+
+  var xpState = [sessaoXP, sessaoNivel]; 
+  var dia = true;
+  var petTam = 150;
+  
+  var statusData = [
+    [sessaoFome, 1500, innercircle_hungry], 
+    [100, 2500, innercircle_happy],         
+    [sessaoEnergia, 2500, innercircle_sleep] 
+  ];
+
+
+  var overlay = div_overlay;
+  var videoNoite = bg_video;
+  var petId = document.getElementById('pet');
+  var xpFillEl = document.getElementById('xpFill');
+  var xpPercentEl = document.getElementById('xpPercent');
+  var xpWrapEl = document.getElementById('xpWrap');
+  var levelBadgeEl = document.getElementById('level-badge');
+  
+  var xpHideTimer = null;
+  var isAnimating = false;
+  var fps = 12;
+
+  var positionStatus = [-90, -10];
+  
+  var framesSentar = [
+    '/sprints/sit/frame_1.png', '/sprints/sit/frame_2.png', '/sprints/sit/frame_3.png',
+    '/sprints/sit/frame_6.png', '/sprints/sit/frame_7.png', '/sprints/sit/frame_8.png',
+    '/sprints/sit/frame_9.png', '/sprints/sit/frame_10.png', '/sprints/sit/frame_11.png',
+    '/sprints/sit/frame_13.png'
+  ];
+
+  var feeling = [
+    [128526, 'estilo'], [128512, 'feliz'], [128544, 'bravo'],
+    [128546, 'triste'], [128533, 'confuso']
+  ];
+
+
+  function carregarDadosUsuario() {
+      var elNome = document.querySelector('.profile-name');
+      elNome.innerText = sessaoNome;
+
+      petId.src = sessaoSkin;
+
+      innerText = 'Lv. ' + sessaoNivel;
+      renderXP(false);
+      calcularStatus(0); 
+      calcularStatus(1); 
+      calcularStatus(2); 
+  }
+
 
   function startNightTransition() {
     if (dia) {
-      text_transition.innerHTML = `Então anoiteceu...`
+      text_transition.innerHTML = `Então anoiteceu...`;
     } else {
-      text_transition.innerHTML = `Então amanheceu...`
+      text_transition.innerHTML = `Então amanheceu...`;
     }
 
     overlay.classList.add('active');
     setTimeout(() => {
-      overlay.classList.remove('active')
+      overlay.classList.remove('active');
       overlay.classList.add('fade-out');
       setTimeout(() => {
         overlay.classList.remove('fade-out');
       }, 7500);
     }, 6000);
   }
-  var videoNoite = bg_video
 
   function virarNoite() {
     if (dia) {
-      startNightTransition()
+      startNightTransition();
       setTimeout(() => {
         videoNoite.style.display = "block";
         document.body.style.backgroundImage = "none";
@@ -137,153 +91,31 @@
           videoNoite.style.display = "none";
           document.body.style.backgroundImage = "url(/backgound/noite.png)";
         }, 8000);
-      }, 5000)
-      dia = false
+      }, 5000);
+      dia = false;
     } else {
-      startNightTransition()
+      startNightTransition();
       setTimeout(() => {
         videoNoite.style.opacity = "0";
         videoNoite.style.display = "none";
         document.body.style.backgroundImage = "url(/backgound/dia2.png)";
       }, 5000);
-      dia = true
+      dia = true;
     }
   }
-
-  function toggleRadialMenu() {
-    var menu = radialMenu;
-    menu.classList.toggle('active');
-  }
-
-  var positionStatus = [
-    -90,
-    -10
-  ]
-  var statusData = [
-    [
-      100,
-      1500,
-      innercircle_hungry
-    ],
-    [
-      100,
-      2500,
-      innercircle_happy
-    ],
-    [
-      100,
-      2500,
-      innercircle_sleep
-    ],
-
-  ]
-
-  var feeling = [
-    [128526, 'estilo'],
-    [128512, 'feliz'],
-    [128544, 'bravo'],
-    [128546, 'triste'],
-    [128533, 'confuso']
-  ]
-
-  function diminuirStatus(iStatus) {
-    if (dia) {
-      statusData[iStatus][0] -= 5
-      calcularStatus(iStatus)
-    } else {
-      dormir()
-    }
-  }
-
-  function calcularStatus(iStatus) {
-    var rangePX = positionStatus[0] - positionStatus[1]
-    var statusPX = (rangePX * statusData[iStatus][0]) / 100
-
-    if (statusPX <= positionStatus[1]) {
-      statusData[iStatus][2].style.top = `${statusPX}px`
-    } else {
-      statusData[iStatus][2].style.top = `${positionStatus[1]}px`
-    }
-  }
-  function alimentar() {
-    statusData[0][0] += 20
-    calcularStatus(0)
-    adicionarXP(18);
-  }
-  function dormir() {
-    statusData[2][0] += 1
-    calcularStatus(2)
-  }
-  function intervalStatus(iStatus) {
-    setInterval(() => diminuirStatus(iStatus), statusData[iStatus][1])
-  }
-  function renderStatus() {
-    for (var i = 0; i < statusData.length; i++) {
-      intervalStatus(i)
-    }
-  }
-  renderStatus()
-  function handleExpandAction() {
-    if (actions.classList.contains('expand')) {
-      actions.classList.remove("expand")
-    } else {
-      actions.classList.add("expand")
-    }
-  }
-  function conversar() {
-    if (model.classList.contains('activate')) {
-      model.classList.remove('active')
-    } else {
-      var textEmogi = ''
-      for (var i = 0; i < feeling.length; i++) {
-        textEmogi += `<button onclick='explainFeeling(${i})' class='emogi-button'>&#${feeling[i][0]}<button>`
-      }
-      emogis_container.innerHTML = textEmogi
-      model.classList.add('activate')
-    }
-  }
-
-  function explainFeeling(indiceEmogi) {
-    model.innerHTML = `
-      <h2>Caso quiser explique o que sente <h2/>
-      <input type='text' id='ipt_textFeeling' oninput="handleTextFeeling()" class='ipt-fell'>
-    `
-  }
-
-  function handleTextFeeling() {
-    var textFeeling = ipt_textFeeling.value
-  }
-
-</script>
-<script>
-  var petId = document.getElementById('pet');
-  var petTam = 150
-  var framesSentar = [
-    '/sprints/sit/frame_1.png',
-    '/sprints/sit/frame_2.png',
-    '/sprints/sit/frame_3.png',
-    '/sprints/sit/frame_6.png',
-    '/sprints/sit/frame_7.png',
-    '/sprints/sit/frame_8.png',
-    '/sprints/sit/frame_9.png',
-    '/sprints/sit/frame_10.png',
-    '/sprints/sit/frame_11.png',
-    '/sprints/sit/frame_13.png',
-  ];
-  var fps = 12;
-  var isAnimating = false;
 
   function aumentarPet() {
     if (petTam <= 600) {
       petId.style.width = `${petTam + 50}px`;
-      petTam += 100
+      petTam += 100;
     }
   }
+
   function sentar() {
     if (petId.src.includes(framesSentar[framesSentar.length - 1])) {
       isAnimating = true;
       var i = framesSentar.length - 1;
-      
+
       var intervaloLevantar = setInterval(() => {
         petId.src = framesSentar[i];
         i--;
@@ -295,7 +127,7 @@
         }
       }, 1000 / fps);
 
-      levantar.innerHTML = `Sentar`
+      levantar.innerHTML = `Sentar`;
     } else {
       isAnimating = true;
       var i = 0;
@@ -310,18 +142,57 @@
           petId.src = framesSentar[framesSentar.length - 1];
         }
       }, 1000 / fps);
-       levantar.innerHTML = `Levantar`
+      levantar.innerHTML = `Levantar`;
     }
   }
 
+  function alimentar() {
+    if(statusData[0][0] < 100) {
+        statusData[0][0] += 20;
+        if(statusData[0][0] > 100) statusData[0][0] = 100;
+        calcularStatus(0);
+        adicionarXP(18);
+    }
+  }
 
-  var xpFillEl = document.getElementById('xpFill');
-  var xpPercentEl = document.getElementById('xpPercent');
-  var xpWrapEl = document.getElementById('xpWrap');
-  var levelBadgeEl = document.getElementById('level-badge');
+  function dormir() {
+    if(statusData[2][0] < 100) {
+        statusData[2][0] += 1;
+        if(statusData[2][0] > 100) statusData[2][0] = 100;
+        calcularStatus(2);
+    }
+  }
 
-  var xpState = [0, 1];
+  function calcularStatus(iStatus) {
+    var rangePX = positionStatus[0] - positionStatus[1];
+    var statusPX = (rangePX * statusData[iStatus][0]) / 100;
 
+    if (statusPX <= positionStatus[1]) {
+      statusData[iStatus][2].style.top = `${statusPX}px`;
+    } else {
+      statusData[iStatus][2].style.top = `${positionStatus[1]}px`;
+    }
+  }
+
+  function diminuirStatus(iStatus) {
+    if (dia) {
+      statusData[iStatus][0] -= 5;
+      if(statusData[iStatus][0] < 0) statusData[iStatus][0] = 0;
+      calcularStatus(iStatus);
+    } else {
+      dormir();
+    }
+  }
+
+  function intervalStatus(iStatus) {
+    setInterval(() => diminuirStatus(iStatus), statusData[iStatus][1]);
+  }
+
+  function renderStatus() {
+    for (var i = 0; i < statusData.length; i++) {
+      intervalStatus(i);
+    }
+  }
 
   function renderXP() {
     var xp = xpState[0];
@@ -357,7 +228,7 @@
       up = true;
     }
 
-    renderXP(true);
+    renderXP();
 
     if (xpState[0] > antes) {
       mostrarXP(2800);
@@ -365,14 +236,52 @@
 
     if (up) {
       if (levelBadgeEl) levelBadgeEl.textContent = 'Lv. ' + xpState[1];
-      aumentarPet()
-      pulsoLevel()
+      aumentarPet();
+      pulsoLevel();
     }
 
     return [up, xpState[0], xpState[1]];
   }
 
+  
+  function toggleRadialMenu() {
+    var menu = radialMenu;
+    menu.classList.toggle('active');
+  }
+
+  function handleExpandAction() {
+    if (actions.classList.contains('expand')) {
+      actions.classList.remove("expand");
+    } else {
+      actions.classList.add("expand");
+    }
+  }
+
+  function conversar() {
+    if (model.classList.contains('activate')) {
+      model.classList.remove('active');
+    } else {
+      var textEmogi = '';
+      for (var i = 0; i < feeling.length; i++) {
+        textEmogi += `<button onclick='explainFeeling(${i})' class='emogi-button'>&#${feeling[i][0]}<button>`;
+      }
+      emogis_container.innerHTML = textEmogi;
+      model.classList.add('activate');
+    }
+  }
+
+  function explainFeeling(indiceEmogi) {
+    model.innerHTML = `
+      <h2>Caso quiser explique o que sente <h2/>
+      <input type='text' id='ipt_textFeeling' oninput="handleTextFeeling()" class='ipt-fell'>
+    `;
+  }
+
+  function handleTextFeeling() {
+    var textFeeling = ipt_textFeeling.value;
+  }
+
+  // INICIALIZAÇÃO
+  carregarDadosUsuario(); 
+  renderStatus(); 
 </script>
-
-
-</html>
