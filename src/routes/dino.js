@@ -7,5 +7,9 @@ router.get("/:dinoId", function (req, res) {
   dinoController.buscarDinoPorUsuario(req, res);
 });
 
+router.put("/atualizar", function (req, res) {
+  dinoController.atualizar(req, res);
+});
+
 
 module.exports = router;

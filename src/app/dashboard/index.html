@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BankDash</title>
+    <title>Dash</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body>
 
+<body>
     <div class="sidebar">
         <h1 class="logo">MathDash.</h1>
-
         <ul class="menu">
             <li>Dashboard</li>
             <li class="active"> Perfil</li>
@@ -27,12 +27,12 @@
                 <h3>Feliz</h3>
             </div>
             <div class="stat-card income">
-                <p>Afinidade</p>
-                <h3>Alta</h3>
+                <p>Alimentação</p>
+                <h3>Excelente - <span id="kpi_qtd"></span></h3>
             </div>
             <div class="stat-card expense">
                 <p>Horas de sono</p>
-                <h3>Boa</h3>
+                <h3>Boa - <span id="qtdSonoSpan"></span></h3>
             </div>
             <div class="stat-card saving">
                 <p>Alertas não vistos</p>
@@ -40,44 +40,96 @@
             </div>
         </div>
         <h3 class="section-title">Horarios de sono</h3>
-        <div class="chart-card">
-            <canvas id="overviewChart"></canvas>
-        </div>
-          <h3 class="section-title">Ultimas ações</h3>
-        <div class="transaction-list">
-            <div class="transaction">
-                <div>
-                    <h4>Alimentou</h4>
-                    <p>14:20</p>
-                </div>
-            </div>
-            <div class="transaction">
-                <div>
-                    <h4>Durmiu</h4>
-                    <p>22:40</p>
-                </div>
-            </div>
-
-            <div class="transaction">
-                <div>
-                    <h4>Brincou</h4>
-                    <p>12:40</p>
-                </div>
-            </div>
+        <h3 class="section-title">Ultimas ações</h3>
+        <div class="lista_historico" id="lista_historico">
         </div>
     </div>
     <script>
-        new Chart(document.getElementById("overviewChart"), {
-            type: "bar",
-            data: {
-                labels: ["Dom","Seg","Ter","Qua","Qui","Sex","Sab"],
-                datasets: [
-                    { label: "Ideal", data: [12, 9, 7, 13, 8, 11, 14] },
-                    { label: "Atual", data: [10, 6, 5, 11, 7, 9, 12] }
-                ]
-            }
-        });
+        var idDino = sessionStorage.ID_DINO
+        var logs = []
+        var kpiTotalAlimentado = 0
+        var qtdSono = 0
+        function obterDadosAtualizados() {
+            fetch(`/dinoLog/qtdComida/${idDino}`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                }
+            })
+                .then(resposta => {
+                    if (resposta.ok) {
+                        resposta.json().then(dados => {
+                            dado = dados[0]
+                            kpiTotalAlimentado = dado.total_vezes_alimentado
+                        })
+                    } else {
+                        console.error("Erro ao buscar dados atualizados")
+                    }
+                })
+                .catch(erro => console.error("Erro de conexão:", erro))
+
+            fetch(`/dinoLog/qtdMetricasSono/${idDino}`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                }
+            })
+                .then(resposta => {
+                    if (resposta.ok) {
+                        resposta.json().then(dados => {
+                            dado = dados[0]
+                            qtdSono = dado.total_tempo_dormiu
+                            renderKPI()
+                        })
+                    } else {
+                        console.error("Erro ao buscar dados atualizados")
+                    }
+                })
+                .catch(erro => console.error("Erro de conexão:", erro))
+
+
+            fetch(`/dinoLog/${idDino}`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                }
+            })
+                .then(resposta => {
+                    if (resposta.ok) {
+                        resposta.json().then(logs => {
+                            var divLista = lista_historico;
+                            divLista.innerHTML = "";
+                            for (var i = 0; i < logs.length; i++) {
+                                var log = logs[i];
+                                var textoHora = log.inicio_formatado;
+                                if (log.data_fim != null && log.acao == 'DORMIR') {
+                                    textoHora += ` até ${log.fim_formatado}`;
+                                }
+
+                                divLista.innerHTML += `
+                                <div class="historico">
+                                    <div>
+                                        <h4>${log.acao}</h4>
+                                        <p>${textoHora}</p>
+                                    </div>
+                                </div>
+                            `;
+                            }
+                        })
+                    } else {
+                        console.error("Erro ao buscar dados atualizados")
+                    }
+                })
+                .catch(erro => console.error("Erro de conexão:", erro))
+        }
+        function renderKPI() {
+            kpi_qtd.innerHTML = kpiTotalAlimentado
+            qtdSonoSpan.innerHTML = qtdSono
+        }
+        obterDadosAtualizados()
+
     </script>
 
 </body>
+
 </html>

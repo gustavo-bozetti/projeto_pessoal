@@ -101,7 +101,7 @@
       .then(function (resposta) {
         if (resposta.ok) {
           resposta.json().then(function (dados) {
-                    dado = dados[0]
+            dado = dados[0]
             console.log(dado)
             sessionStorage.ID_USUARIO = dado.id_usuario;
             sessionStorage.NOME_USUARIO = dado.nome_usuario;
@@ -110,6 +110,7 @@
             sessionStorage.ID_DINO = dado.id_dino;
             sessionStorage.NOME_DINO = dado.nome_dino;
             sessionStorage.NIVEL_DINO = dado.nivel;
+            sessionStorage.XP_DINO = dado.xp;
             sessionStorage.FOME = dado.fome;
             sessionStorage.ENERGIA = dado.energia;
             sessionStorage.SRC_SKIN = dado.src_skin;
